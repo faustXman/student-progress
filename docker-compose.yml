@@ -1,0 +1,12 @@
+
+services:
+  student-progress:
+    build: .
+    container_name: student-progress
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+    environment:
+      - TZ=Europe/London
+    tmpfs:
+      - /tmp
