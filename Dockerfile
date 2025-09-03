@@ -36,8 +36,10 @@ RUN pip install --no-cache-dir --upgrade pip setuptools wheel && \
 # Copy application code
 COPY . .
 
-# Make entrypoint script executable
-RUN chmod +x docker-entrypoint.sh
+# Make entrypoint script executable and ensure it's in the right place
+RUN chmod +x docker-entrypoint.sh && \
+    # Verify gunicorn is installed and accessible
+    which gunicorn && gunicorn --version
 
 # Create non-root user for security (good practice for Pi deployments)
 RUN groupadd -r appuser && useradd -r -g appuser appuser && \
@@ -50,7 +52,7 @@ EXPOSE 8000
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
-    CMD python -c "import requests; requests.get('http://localhost:8000/health', timeout=5)" || exit 1
+    CMD python -c "import requests; r=requests.get('http://localhost:8000/health', timeout=5); exit(0 if r.status_code == 200 else 1)" || exit 1
 
 # Use entrypoint script for better configuration management
 ENTRYPOINT ["./docker-entrypoint.sh"]

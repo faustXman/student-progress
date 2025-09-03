@@ -47,7 +47,13 @@ if [ "$1" = "dev" ]; then
     exec python app.py
 elif [ "$1" = "gunicorn" ]; then
     echo "Starting with Gunicorn..."
-    exec gunicorn --config gunicorn.conf.py --workers $GUNICORN_WORKERS wsgi:app
+    # Check if gunicorn is available
+    if ! command -v gunicorn >/dev/null 2>&1; then
+        echo "Gunicorn not found in PATH, trying with python -m gunicorn"
+        exec python -m gunicorn --config gunicorn.conf.py --workers $GUNICORN_WORKERS wsgi:app
+    else
+        exec gunicorn --config gunicorn.conf.py --workers $GUNICORN_WORKERS wsgi:app
+    fi
 else
     # Default: start with Python (for containers)
     exec python app.py
