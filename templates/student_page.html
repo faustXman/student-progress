@@ -1,23 +1,44 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>{{ name }} - Progress</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ name }} - Progress Report</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <meta name="description" content="Individual progress report for {{ name }} showing steps, demerits, and attendance over time">
 </head>
 <body>
-<header>
+<header role="banner">
     <img src="{{ url_for('static', filename='school_logo.png') }}" alt="Lealands High School Logo" class="logo">
     <h1>{{ name }} – Weekly Progress</h1>
 </header>
 
-<h2>Steps Over Time</h2>
-{{ chart_steps|safe }}
+<main role="main">
+    <section aria-labelledby="steps-heading" class="progress-section">
+        <h2 id="steps-heading">Steps Over Time</h2>
+        <div class="chart-container">
+            {{ chart_steps|safe }}
+        </div>
+    </section>
 
-<h2>Demerits Over Time</h2>
-{{ chart_demerits|safe }}
+    <section aria-labelledby="demerits-heading" class="progress-section">
+        <h2 id="demerits-heading">Demerits Over Time</h2>
+        <div class="chart-container">
+            {{ chart_demerits|safe }}
+        </div>
+    </section>
 
-<h2>Attendance Over Time</h2>
-{{ chart_attendance|safe }}
+    <section aria-labelledby="attendance-heading" class="progress-section">
+        <h2 id="attendance-heading">Attendance Over Time</h2>
+        <div class="chart-container">
+            {{ chart_attendance|safe }}
+        </div>
+    </section>
+</main>
+
+<footer role="contentinfo">
+    <p><small>Individual report for {{ name }} - Generated automatically</small></p>
+</footer>
+
 </body>
 </html>

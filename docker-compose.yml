@@ -1,12 +1,27 @@
 
+version: '3.8'
+
 services:
   student-progress:
-    build: .
+    build: 
+      context: .
+      platforms:
+        - linux/amd64
+        - linux/arm64
     container_name: student-progress
     ports:
       - "8000:8000"
     restart: unless-stopped
     environment:
       - TZ=Europe/London
+      - FLASK_ENV=production
+      - LOG_LEVEL=INFO
     tmpfs:
       - /tmp
+    # Memory limits appropriate for Raspberry Pi 4B
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+        reservations:
+          memory: 512M

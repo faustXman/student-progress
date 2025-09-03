@@ -1,15 +1,20 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lealands High School - Student Progress Report</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <meta name="description" content="Student progress report showing steps, demerits, and attendance data">
 </head>
 <body>
-<header>
+<header role="banner">
     <img src="{{ url_for('static', filename='school_logo.png') }}" alt="Lealands High School Logo" class="logo">
     <h1>Lealands High School – Student Progress Report</h1>
+    <time datetime="{{ timestamp }}">Generated: {{ timestamp }}</time>
 </header>
+
+<main role="main">
 
 <h2>Class Data</h2>
 {{ table|safe }}
@@ -26,8 +31,19 @@
 {% endif %}
 
 {% if chart_overlay %}
-<h2>Steps Distribution: Latest vs Previous Week</h2>
-{{ chart_overlay|safe }}
+<section aria-labelledby="overlay-heading">
+    <h2 id="overlay-heading">Steps Distribution: Latest vs Previous Week</h2>
+    <div class="chart-container">
+        {{ chart_overlay|safe }}
+    </div>
+</section>
 {% endif %}
+
+</main>
+
+<footer role="contentinfo">
+    <p><small>Report generated automatically by Student Progress System</small></p>
+</footer>
+
 </body>
 </html>

@@ -1,4 +1,16 @@
-flask
-pandas
-plotly
-weasyprint
+# Core Flask application
+Flask==2.3.3
+Werkzeug==2.3.7
+
+# Data processing and visualization
+pandas==2.1.1
+plotly==5.17.0
+
+# PDF generation
+weasyprint==60.2
+
+# Production server (optional, for non-containerized deployments)
+gunicorn==21.2.0
+
+# Security and utilities
+python-dotenv==1.0.0
