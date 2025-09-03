@@ -71,72 +71,72 @@ def index():
                 logger.error(f"Missing required columns: {missing_cols}")
                 return f"Missing required columns: {missing_cols}", 400
 
-        if "Week" in df.columns:
-            df["Week"] = pd.to_datetime(df["Week"], errors="coerce")
-            df = df.sort_values(["Name", "Week"])
+            if "Week" in df.columns:
+                df["Week"] = pd.to_datetime(df["Week"], errors="coerce")
+                df = df.sort_values(["Name", "Week"])
 
-        # Class-level charts
-        fig_steps = px.histogram(df, x="Steps", nbins=10,
-                                 color_discrete_sequence=[school_palette[0]])
-        fig_steps.update_traces(mode="lines+markers")
-        steps_html = fig_steps.to_html(full_html=False, include_plotlyjs="cdn")
+            # Class-level charts
+            fig_steps = px.histogram(df, x="Steps", nbins=10,
+                                     color_discrete_sequence=[school_palette[0]])
+            fig_steps.update_traces(mode="lines+markers")
+            steps_html = fig_steps.to_html(full_html=False, include_plotlyjs="cdn")
 
-        fig_demerits = px.histogram(df, x="Demerits", nbins=10,
-                                    color_discrete_sequence=[school_palette[1]])
-        fig_demerits.update_traces(mode="lines+markers")
-        demerits_html = fig_demerits.to_html(full_html=False, include_plotlyjs=False)
+            fig_demerits = px.histogram(df, x="Demerits", nbins=10,
+                                        color_discrete_sequence=[school_palette[1]])
+            fig_demerits.update_traces(mode="lines+markers")
+            demerits_html = fig_demerits.to_html(full_html=False, include_plotlyjs=False)
 
-        attendance_html = ""
-        if "Week" in df.columns:
-            fig_att = px.line(df, x="Week", y="Attendance", color="Name",
-                              markers=True, color_discrete_sequence=school_palette)
-            attendance_html = fig_att.to_html(full_html=False, include_plotlyjs=False)
+            attendance_html = ""
+            if "Week" in df.columns:
+                fig_att = px.line(df, x="Week", y="Attendance", color="Name",
+                                  markers=True, color_discrete_sequence=school_palette)
+                attendance_html = fig_att.to_html(full_html=False, include_plotlyjs=False)
 
-        # Overlay polygons
-        overlay_html = ""
-        if "Week" in df.columns and df["Week"].nunique() > 1:
-            latest_week = df["Week"].max()
-            prev_week = sorted(df["Week"].unique())[-2]
-            fig_overlay = px.histogram(df[df["Week"] == latest_week], x="Steps", nbins=10,
-                                       opacity=0.5, color_discrete_sequence=[school_palette[0]])
-            fig_overlay.add_histogram(x=df[df["Week"] == prev_week]["Steps"], nbins=10,
-                                      opacity=0.5, marker_color=school_palette[1])
-            overlay_html = fig_overlay.to_html(full_html=False, include_plotlyjs=False)
+            # Overlay polygons
+            overlay_html = ""
+            if "Week" in df.columns and df["Week"].nunique() > 1:
+                latest_week = df["Week"].max()
+                prev_week = sorted(df["Week"].unique())[-2]
+                fig_overlay = px.histogram(df[df["Week"] == latest_week], x="Steps", nbins=10,
+                                           opacity=0.5, color_discrete_sequence=[school_palette[0]])
+                fig_overlay.add_histogram(x=df[df["Week"] == prev_week]["Steps"], nbins=10,
+                                          opacity=0.5, marker_color=school_palette[1])
+                overlay_html = fig_overlay.to_html(full_html=False, include_plotlyjs=False)
 
-        # Render class report
-        html_report = render_template(
-            "report.html",
-            table=df.to_html(index=False),
-            chart_steps=steps_html,
-            chart_demerits=demerits_html,
-            chart_attendance=attendance_html,
-            chart_overlay=overlay_html
-        )
-
-        # Build PDF parts
-        pdf_parts = [HTML(string=html_report).render()]
-
-        # Per-student pages
-        for student in df["Name"].unique():
-            sdata = df[df["Name"] == student]
-            fig_s_steps = px.line(sdata, x="Week", y="Steps", markers=True,
-                                  title=f"{student} - Steps",
-                                  color_discrete_sequence=[school_palette[0]])
-            fig_s_demerits = px.line(sdata, x="Week", y="Demerits", markers=True,
-                                     title=f"{student} - Demerits",
-                                     color_discrete_sequence=[school_palette[1]])
-            fig_s_att = px.line(sdata, x="Week", y="Attendance", markers=True,
-                                title=f"{student} - Attendance",
-                                color_discrete_sequence=[school_palette[2]])
-
-            student_html = render_template(
-                "student_page.html",
-                name=student,
-                chart_steps=fig_s_steps.to_html(full_html=False, include_plotlyjs=False),
-                chart_demerits=fig_s_demerits.to_html(full_html=False, include_plotlyjs=False),
-                chart_attendance=fig_s_att.to_html(full_html=False, include_plotlyjs=False)
+            # Render class report
+            html_report = render_template(
+                "report.html",
+                table=df.to_html(index=False),
+                chart_steps=steps_html,
+                chart_demerits=demerits_html,
+                chart_attendance=attendance_html,
+                chart_overlay=overlay_html
             )
-            pdf_parts.append(HTML(string=student_html).render())
+
+            # Build PDF parts
+            pdf_parts = [HTML(string=html_report).render()]
+
+            # Per-student pages
+            for student in df["Name"].unique():
+                sdata = df[df["Name"] == student]
+                fig_s_steps = px.line(sdata, x="Week", y="Steps", markers=True,
+                                      title=f"{student} - Steps",
+                                      color_discrete_sequence=[school_palette[0]])
+                fig_s_demerits = px.line(sdata, x="Week", y="Demerits", markers=True,
+                                         title=f"{student} - Demerits",
+                                         color_discrete_sequence=[school_palette[1]])
+                fig_s_att = px.line(sdata, x="Week", y="Attendance", markers=True,
+                                    title=f"{student} - Attendance",
+                                    color_discrete_sequence=[school_palette[2]])
+
+                student_html = render_template(
+                    "student_page.html",
+                    name=student,
+                    chart_steps=fig_s_steps.to_html(full_html=False, include_plotlyjs=False),
+                    chart_demerits=fig_s_demerits.to_html(full_html=False, include_plotlyjs=False),
+                    chart_attendance=fig_s_att.to_html(full_html=False, include_plotlyjs=False)
+                )
+                pdf_parts.append(HTML(string=student_html).render())
 
             # Merge into one PDF with memory optimization for Pi
             logger.info("Generating PDF report")
