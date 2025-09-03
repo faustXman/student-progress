@@ -25,24 +25,25 @@ RUN apt-get update && apt-get install -y \
 
 WORKDIR /app
 
+# Create non-root user early for security (good practice for Pi deployments)
+RUN groupadd -r appuser && useradd -r -g appuser appuser
+
 # Copy requirements first for better Docker layer caching
 COPY requirements.txt .
 
 # Install Python packages with optimizations for ARM
-RUN pip install --no-cache-dir --upgrade pip setuptools wheel && \
+# Use --root-user-action=ignore to suppress the warning in container context
+RUN pip install --no-cache-dir --root-user-action=ignore --upgrade pip setuptools wheel && \
     # Use pre-compiled wheels when available to speed up ARM builds
-    pip install --no-cache-dir --find-links https://www.piwheels.org/simple -r requirements.txt
+    pip install --no-cache-dir --root-user-action=ignore --find-links https://www.piwheels.org/simple -r requirements.txt && \
+    # Verify gunicorn is installed and accessible
+    which gunicorn && gunicorn --version
 
 # Copy application code
 COPY . .
 
-# Make entrypoint script executable and ensure it's in the right place
+# Make entrypoint script executable and set proper ownership
 RUN chmod +x docker-entrypoint.sh && \
-    # Verify gunicorn is installed and accessible
-    which gunicorn && gunicorn --version
-
-# Create non-root user for security (good practice for Pi deployments)
-RUN groupadd -r appuser && useradd -r -g appuser appuser && \
     chown -R appuser:appuser /app
 
 USER appuser
